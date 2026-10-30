@@ -56650,7 +56650,7 @@ __webpack_exports__.stopEvent;
 __webpack_exports__.version;
 const pdfWorkerUrl = "" + new URL("pdf.worker.min-yatZIOMy.mjs", import.meta.url).href;
 __webpack_exports__GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
-const PageContainer = ({ pdfDoc, pageNumber, zoom }) => {
+const PageContainer = ({ pdfDoc, pageNumber, zoom, onRendered }) => {
   const canvasRef = reactExports.useRef(null);
   const [isRendered, setIsRendered] = reactExports.useState(false);
   reactExports.useEffect(() => {
@@ -56668,6 +56668,7 @@ const PageContainer = ({ pdfDoc, pageNumber, zoom }) => {
           viewport
         }).promise;
         setIsRendered(true);
+        onRendered(pageNumber, viewport.height);
       } catch (err) {
         console.error(`Error rendering page ${pageNumber}:`, err);
       }
@@ -56678,7 +56679,8 @@ const PageContainer = ({ pdfDoc, pageNumber, zoom }) => {
     position: "relative",
     marginBottom: "10px",
     display: "inline-block",
-    boxShadow: "0 0 5px rgba(0,0,0,0.2)"
+    boxShadow: "0 0 5px rgba(0,0,0,0.2)",
+    backgroundColor: "#fff"
   }, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("canvas", { ref: canvasRef }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -56695,13 +56697,17 @@ const PageContainer = ({ pdfDoc, pageNumber, zoom }) => {
 const PdfViewer = ({ docId }) => {
   const { documents, zoom, setZoom, currentPage, setPage } = usePdfStore();
   const [pdfDoc, setPdfDoc] = reactExports.useState(null);
+  const [pageHeights, setPageHeights] = reactExports.useState({});
   const scrollContainerRef = reactExports.useRef(null);
   const doc = documents.find((d) => d.id === docId);
   reactExports.useEffect(() => {
     if (!doc) return;
     const loadPdf = async () => {
       try {
-        const loadingTask = __webpack_exports__getDocument({ data: doc.data });
+        const loadingTask = __webpack_exports__getDocument({
+          data: doc.data,
+          verbosity: 0
+        });
         const pdf = await loadingTask.promise;
         setPdfDoc(pdf);
       } catch (err) {
@@ -56710,6 +56716,9 @@ const PdfViewer = ({ docId }) => {
     };
     loadPdf();
   }, [docId, doc]);
+  const handlePageRendered = (pageNumber, height) => {
+    setPageHeights((prev) => ({ ...prev, [pageNumber]: height }));
+  };
   reactExports.useEffect(() => {
     const handleWheel = (e) => {
       if (e.ctrlKey) {
@@ -56734,19 +56743,222 @@ const PdfViewer = ({ docId }) => {
         flexDirection: "column",
         alignItems: "center",
         backgroundColor: "#525659",
-        padding: "20px"
+        padding: "20px",
+        boxSizing: "border-box"
       },
       children: pdfDoc && Array.from({ length: pdfDoc.numPages }, (_, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
         PageContainer,
         {
           pdfDoc,
           pageNumber: i + 1,
-          zoom
+          zoom,
+          onRendered: handlePageRendered
         },
         i
       ))
     }
   );
+};
+/**
+ * @license lucide-react v0.468.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const toKebabCase = (string) => string.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+const mergeClasses = (...classes) => classes.filter((className, index2, array) => {
+  return Boolean(className) && className.trim() !== "" && array.indexOf(className) === index2;
+}).join(" ").trim();
+/**
+ * @license lucide-react v0.468.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+var defaultAttributes = {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: 24,
+  height: 24,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 2,
+  strokeLinecap: "round",
+  strokeLinejoin: "round"
+};
+/**
+ * @license lucide-react v0.468.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const Icon = reactExports.forwardRef(
+  ({
+    color = "currentColor",
+    size = 24,
+    strokeWidth = 2,
+    absoluteStrokeWidth,
+    className = "",
+    children,
+    iconNode,
+    ...rest
+  }, ref) => {
+    return reactExports.createElement(
+      "svg",
+      {
+        ref,
+        ...defaultAttributes,
+        width: size,
+        height: size,
+        stroke: color,
+        strokeWidth: absoluteStrokeWidth ? Number(strokeWidth) * 24 / Number(size) : strokeWidth,
+        className: mergeClasses("lucide", className),
+        ...rest
+      },
+      [
+        ...iconNode.map(([tag, attrs]) => reactExports.createElement(tag, attrs)),
+        ...Array.isArray(children) ? children : [children]
+      ]
+    );
+  }
+);
+/**
+ * @license lucide-react v0.468.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const createLucideIcon = (iconName, iconNode) => {
+  const Component2 = reactExports.forwardRef(
+    ({ className, ...props }, ref) => reactExports.createElement(Icon, {
+      ref,
+      iconNode,
+      className: mergeClasses(`lucide-${toKebabCase(iconName)}`, className),
+      ...props
+    })
+  );
+  Component2.displayName = `${iconName}`;
+  return Component2;
+};
+/**
+ * @license lucide-react v0.468.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const FileText = createLucideIcon("FileText", [
+  ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
+  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }],
+  ["path", { d: "M10 9H8", key: "b1mrlr" }],
+  ["path", { d: "M16 13H8", key: "t4e002" }],
+  ["path", { d: "M16 17H8", key: "z1uh3a" }]
+]);
+/**
+ * @license lucide-react v0.468.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const FolderOpen = createLucideIcon("FolderOpen", [
+  [
+    "path",
+    {
+      d: "m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2",
+      key: "usdka0"
+    }
+  ]
+]);
+/**
+ * @license lucide-react v0.468.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const Square = createLucideIcon("Square", [
+  ["rect", { width: "18", height: "18", x: "3", y: "3", rx: "2", key: "afitv7" }]
+]);
+/**
+ * @license lucide-react v0.468.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const ZoomIn = createLucideIcon("ZoomIn", [
+  ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }],
+  ["line", { x1: "21", x2: "16.65", y1: "21", y2: "16.65", key: "13gj7c" }],
+  ["line", { x1: "11", x2: "11", y1: "8", y2: "14", key: "1vmskp" }],
+  ["line", { x1: "8", x2: "14", y1: "11", y2: "11", key: "durymu" }]
+]);
+/**
+ * @license lucide-react v0.468.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const ZoomOut = createLucideIcon("ZoomOut", [
+  ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }],
+  ["line", { x1: "21", x2: "16.65", y1: "21", y2: "16.65", key: "13gj7c" }],
+  ["line", { x1: "8", x2: "14", y1: "11", y2: "11", key: "durymu" }]
+]);
+const Dropdown = ({ label, items }) => {
+  const [isOpen, setIsOpen] = reactExports.useState(false);
+  const menuRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { position: "relative" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        onClick: () => setIsOpen(!isOpen),
+        style: { cursor: "pointer", padding: "0 10px", fontSize: "12px" },
+        children: label
+      }
+    ),
+    isOpen && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        ref: menuRef,
+        style: {
+          position: "absolute",
+          top: "100%",
+          left: 0,
+          background: "#fff",
+          border: "1px solid #ccc",
+          boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
+          zIndex: 1e3,
+          minWidth: "150px",
+          padding: "5px 0"
+        },
+        children: items.map((item, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "div",
+          {
+            onClick: () => {
+              item.onClick?.();
+              setIsOpen(false);
+            },
+            style: {
+              padding: "5px 15px",
+              fontSize: "12px",
+              cursor: item.disabled ? "not-allowed" : "pointer",
+              color: item.disabled ? "#999" : "#333",
+              backgroundColor: "transparent"
+            },
+            onMouseEnter: (e) => !item.disabled && (e.currentTarget.style.backgroundColor = "#eee"),
+            onMouseLeave: (e) => !item.disabled && (e.currentTarget.style.backgroundColor = "transparent"),
+            children: item.label
+          },
+          idx
+        ))
+      }
+    )
+  ] });
 };
 const Layout = () => {
   const {
@@ -56754,7 +56966,9 @@ const Layout = () => {
     activeDocId,
     setActiveDocId,
     addDocument,
-    closeDocument
+    closeDocument,
+    zoom,
+    setZoom
   } = usePdfStore();
   const activeDoc = documents.find((d) => d.id === activeDocId);
   const handleOpenFile = async () => {
@@ -56775,20 +56989,102 @@ const Layout = () => {
     fontFamily: "sans-serif",
     boxSizing: "border-box"
   }, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "1 / -1", background: "#fff", borderBottom: "1px solid #ccc", display: "flex", alignItems: "center", padding: "0 10px", fontSize: "12px", userSelect: "none" }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: "15px" }, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { position: "relative", cursor: "pointer" }, onClick: handleOpenFile, children: "File" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { cursor: "pointer" }, children: "Edit" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { cursor: "pointer" }, children: "View" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { cursor: "pointer" }, children: "Document" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { cursor: "pointer" }, children: "Tools" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { cursor: "pointer" }, children: "Help" })
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "1 / -1", background: "#fff", borderBottom: "1px solid #ccc", display: "flex", alignItems: "center", padding: "0 10px", fontSize: "12px", userSelect: "none" }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: "0px" }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Dropdown,
+        {
+          label: "File",
+          items: [
+            { label: "Open (Ctrl+O)", onClick: handleOpenFile },
+            { label: "Close Tab", onClick: () => activeDocId && closeDocument(activeDocId) },
+            { label: "Exit", onClick: () => window.close() }
+          ]
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Dropdown,
+        {
+          label: "Edit",
+          items: [{ label: "Coming soon...", disabled: true }]
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Dropdown,
+        {
+          label: "View",
+          items: [
+            { label: "Zoom In", onClick: () => setZoom(zoom * 1.2) },
+            { label: "Zoom Out", onClick: () => setZoom(zoom / 1.2) },
+            { label: "Fit Page", onClick: () => setZoom(0.5) },
+            { label: "Fit Width", onClick: () => setZoom(1) },
+            { label: "Actual Size", onClick: () => setZoom(1) }
+          ]
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Dropdown,
+        {
+          label: "Document",
+          items: [{ label: "Coming soon...", disabled: true }]
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Dropdown,
+        {
+          label: "Tools",
+          items: [{ label: "Coming soon...", disabled: true }]
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Dropdown,
+        {
+          label: "Help",
+          items: [{ label: "Coming soon...", disabled: true }]
+        }
+      )
     ] }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "1 / -1", background: "#fafafa", borderBottom: "1px solid #ccc", display: "flex", alignItems: "center", padding: "0 10px", fontSize: "12px" }, children: "Properties Toolbar" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "1 / -1", background: "#eee", borderBottom: "1px solid #ccc", display: "flex", alignItems: "center", padding: "0 10px", fontSize: "12px" }, children: "Toolbars Row" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "1", background: "#ddd", borderRight: "1px solid #ccc", display: "flex", justifyContent: "center", alignItems: "center" }, children: "L" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "1 / -1", background: "#fafafa", borderBottom: "1px solid #ccc", height: "40px" } }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { gridColumn: "1 / -1", background: "#eee", borderBottom: "1px solid #ccc", display: "flex", alignItems: "center", padding: "0 10px", gap: "10px", fontSize: "12px" }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: handleOpenFile, title: "Open", style: { padding: "4px", cursor: "pointer", display: "flex", alignItems: "center" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(FolderOpen, { size: 16 }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { width: "1px", height: "20px", background: "#ccc", margin: "0 5px" } }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => setZoom(zoom - 0.1), title: "Zoom Out", style: { padding: "4px", cursor: "pointer", display: "flex", alignItems: "center" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(ZoomOut, { size: 16 }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => setZoom(zoom + 0.1), title: "Zoom In", style: { padding: "4px", cursor: "pointer", display: "flex", alignItems: "center" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(ZoomIn, { size: 16 }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => setZoom(0.5), title: "Fit Page", style: { padding: "4px", cursor: "pointer", display: "flex", alignItems: "center" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { size: 16 }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => setZoom(1), title: "Fit Width", style: { padding: "4px", cursor: "pointer", display: "flex", alignItems: "center" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Square, { size: 16 }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginLeft: "10px", display: "flex", alignItems: "center", gap: "5px" }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Zoom:" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+          Math.round(zoom * 100),
+          "%"
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "1", background: "#ddd", borderRight: "1px solid #ccc" } }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { gridColumn: "2", background: "#fff", borderRight: "1px solid #ccc", overflowY: "auto" }, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "10px", fontWeight: "bold", fontSize: "12px", borderBottom: "1px solid #eee" }, children: "Thumbnails" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "10px", fontSize: "12px" }, children: activeDoc ? `Pages: ${activeDoc.totalPages}` : "No document open" })
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "10px", fontWeight: "bold", fontSize: "12px", borderBottom: "1px solid #eee", background: "#f8f8f8" }, children: "Thumbnails" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "10px", display: "flex", flexDirection: "column", gap: "10px" }, children: activeDoc ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", flexDirection: "column", gap: "10px" }, children: Array.from({ length: activeDoc.totalPages || 0 }, (_, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "div",
+        {
+          style: {
+            width: "100px",
+            height: "140px",
+            background: "#eee",
+            border: "1px solid #ccc",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            cursor: "pointer",
+            fontSize: "10px"
+          },
+          onClick: () => {
+          },
+          children: [
+            "Page ",
+            i + 1
+          ]
+        },
+        i
+      )) }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { color: "#999", fontSize: "12px" }, children: "No document open" }) })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { gridColumn: "3", background: "#fff", position: "relative", overflow: "hidden" }, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { height: "30px", background: "#eee", borderBottom: "1px solid #ccc", display: "flex", alignItems: "center", padding: "0 10px", fontSize: "12px", gap: "5px" }, children: documents.map((doc) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -56803,7 +57099,8 @@ const Layout = () => {
             fontSize: "11px",
             display: "flex",
             alignItems: "center",
-            gap: "5px"
+            gap: "5px",
+            borderBottom: "none"
           },
           onClick: () => setActiveDocId(doc.id),
           children: [
@@ -56816,10 +57113,29 @@ const Layout = () => {
         },
         doc.id
       )) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { height: "calc(100% - 30px)", width: "100%", overflow: "hidden" }, children: activeDoc ? /* @__PURE__ */ jsxRuntimeExports.jsx(PdfViewer, { docId: activeDoc.id }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", justifyContent: "center", alignItems: "center", height: "100%", color: "#999" }, children: "Open a PDF to start" }) })
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { height: "calc(100% - 30px)", width: "100%", overflow: "hidden" }, children: activeDoc ? /* @__PURE__ */ jsxRuntimeExports.jsx(PdfViewer, { docId: activeDoc.id }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "div",
+        {
+          onClick: handleOpenFile,
+          style: {
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+            color: "#666",
+            cursor: "pointer",
+            flexDirection: "column",
+            gap: "10px"
+          },
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(FolderOpen, { size: 48, color: "#ccc" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: "18px" }, children: "Open PDF to start" })
+          ]
+        }
+      ) })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "4", background: "#fff", borderLeft: "1px solid #ccc" }, children: "Right Panel" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "5", background: "#ddd", borderLeft: "1px solid #ccc", display: "flex", justifyContent: "center", alignItems: "center" }, children: "R" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "4", background: "#fff", borderLeft: "1px solid #ccc" } }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "5", background: "#ddd", borderLeft: "1px solid #ccc" } }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { gridColumn: "1 / -1", background: "#fff", borderTop: "1px solid #ccc", display: "flex", alignItems: "center", padding: "0 10px", fontSize: "12px" }, children: "Markups List" }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { gridColumn: "1 / -1", background: "#eee", borderTop: "1px solid #ccc", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", fontSize: "12px" }, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => {
@@ -56834,12 +57150,21 @@ const Layout = () => {
       }, children: "Next" })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { gridColumn: "1 / -1", background: "#ddd", borderTop: "1px solid #ccc", display: "flex", alignItems: "center", padding: "0 10px", fontSize: "11px", justifyContent: "space-between" }, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-        "Scale: ",
-        activeDoc ? "100%" : "N/A",
-        " | Coords: 0, 0"
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: "10px" }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+          "Page ",
+          activeDoc ? "1" : "N/A",
+          " of ",
+          activeDoc?.totalPages || 0
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+          "Zoom: ",
+          Math.round(zoom * 100),
+          "%"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Coords: 0, 0" })
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: "Snap: Off" })
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: "10px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Snap: Off" }) })
     ] })
   ] });
 };

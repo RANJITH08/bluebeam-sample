@@ -3,7 +3,6 @@ import { Stage, Layer } from 'react-konva';
 import * as pdfjsLib from 'pdfjs-dist';
 import { usePdfStore } from './usePdfStore';
 
-// Bundle worker locally using ?url
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -11,9 +10,10 @@ interface PageContainerProps {
   pdfDoc: any;
   pageNumber: number;
   zoom: number;
+  onRendered: (pageNumber: number, height: number) => void;
 }
 
-const PageContainer = ({ pdfDoc, pageNumber, zoom }: PageContainerProps) => {
+const PageContainer = ({ pdfDoc, pageNumber, zoom, onRendered }: PageContainerProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isRendered, setIsRendered] = useState(false);
 
@@ -36,6 +36,7 @@ const PageContainer = ({ pdfDoc, pageNumber, zoom }: PageContainerProps) => {
         }).promise;
 
         setIsRendered(true);
+        onRendered(pageNumber, viewport.height);
       } catch (err) {
         console.error(`Error rendering page ${pageNumber}:`, err);
       }
@@ -49,11 +50,12 @@ const PageContainer = ({ pdfDoc, pageNumber, zoom }: PageContainerProps) => {
       position: 'relative',
       marginBottom: '10px',
       display: 'inline-block',
-      boxShadow: '0 0 5px rgba(0,0,0,0.2)'
+      boxShadow: '0 0 5px rgba(0,0,0,0.2)',
+      backgroundColor: '#fff'
     }}>
       <canvas ref={canvasRef} />
       <Stage
-        width={0} // Logic for Konva scale would go here
+        width={0}
         height={0}
         style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}
       >
@@ -66,6 +68,7 @@ const PageContainer = ({ pdfDoc, pageNumber, zoom }: PageContainerProps) => {
 export const PdfViewer = ({ docId }: { docId: string }) => {
   const { documents, zoom, setZoom, currentPage, setPage } = usePdfStore();
   const [pdfDoc, setPdfDoc] = useState<any>(null);
+  const [pageHeights, setPageHeights] = useState<Record<number, number>>({});
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const doc = documents.find(d => d.id === docId);
@@ -75,11 +78,15 @@ export const PdfViewer = ({ docId }: { docId: string }) => {
 
     const loadPdf = async () => {
       try {
-        const loadingTask = pdfjsLib.getDocument({ data: doc.data });
+        const loadingTask = pdfjsLib.getDocument({
+          data: doc.data,
+          verbosity: 0
+        });
         const pdf = await loadingTask.promise;
         setPdfDoc(pdf);
 
-        // Update total pages in store if needed (not implementing global totalPages update here for simplicity)
+        // Update document totalPages in store if needed
+        // (Assuming we update usePdfStore.ts to support this)
       } catch (err) {
         console.error('Error loading PDF data:', err);
       }
@@ -87,6 +94,10 @@ export const PdfViewer = ({ docId }: { docId: string }) => {
 
     loadPdf();
   }, [docId, doc]);
+
+  const handlePageRendered = (pageNumber: number, height: number) => {
+    setPageHeights(prev => ({ ...prev, [pageNumber]: height }));
+  };
 
   // Zoom handler
   useEffect(() => {
@@ -113,7 +124,8 @@ export const PdfViewer = ({ docId }: { docId: string }) => {
         flexDirection: 'column',
         alignItems: 'center',
         backgroundColor: '#525659',
-        padding: '20px'
+        padding: '20px',
+        boxSizing: 'border-box'
       }}
     >
       {pdfDoc && Array.from({ length: pdfDoc.numPages }, (_, i) => (
@@ -122,6 +134,7 @@ export const PdfViewer = ({ docId }: { docId: string }) => {
           pdfDoc={pdfDoc}
           pageNumber={i + 1}
           zoom={zoom}
+          onRendered={handlePageRendered}
         />
       ))}
     </div>

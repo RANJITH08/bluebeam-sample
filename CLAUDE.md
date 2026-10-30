@@ -11,6 +11,8 @@ Goal all features unlocked, no login/licensing/network at runtime, ships as .exe
 5. Never invent library APIs. If unsure, check node_modules typings or docs first.
 6. Update FEATURES.md checkboxes and PROGRESS.md after each step, then `git commit`.
 7. No third-party branding, icons, or stamps. Use Lucide icons and original names.
+   Verify each icon with a node -e check against require('lucide-react') before importing.
+   Use forward slashes in shell commands.
 8. No CDNnetwork assets. Bundle pdf.js worker, fonts, and icons locally.
 
 ## Layout (implement as regions, own styling)
@@ -18,7 +20,7 @@ Menu bar - Properties toolbar (context-sensitive) - Toolbars row -
 [left panel access bar  left panel  MAIN WORKSPACE with doc tabs 
 right panel  right access bar] - bottom panel (Markups List) - navigation
 bar - status bar (page, scale, cursor, snap toggles).
-Panels are dockable left/right/bottom, hideable, auto-hide.
+Panels are dockable leftrightbottom, hideable, auto-hide.
 
 ## Architecture
 src/app, src/pdf, src/markup (types, store, tools), src/measure,

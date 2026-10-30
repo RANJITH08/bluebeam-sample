@@ -9,17 +9,29 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
+    autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
+      preload: path.join(__dirname, "../preload/index.mjs"),
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      sandbox: false
     }
+  });
+  win.webContents.openDevTools({ mode: "detach" });
+  win.webContents.on("console-message", (_e, level, message, line, source) => {
+    console.log(`[renderer] [${level}] ${message} (${source}:${line})`);
+  });
+  win.webContents.on("did-fail-load", (_e, code, desc, url) => {
+    console.log(`[did-fail-load] code: ${code}, desc: ${desc}, url: ${url}`);
+  });
+  win.webContents.on("render-process-gone", (_e, details) => {
+    console.log("[render-process-gone]", details);
   });
   Menu.setApplicationMenu(null);
   if (process.env.ELECTRON_RENDERER_URL) {
     win.loadURL(process.env.ELECTRON_RENDERER_URL);
   } else {
-    win.loadFile(path.join(__dirname, "../renderer/index.html"));
+    win.loadFile(path.join(__dirname, "../out/renderer/index.html"));
   }
 }
 app.whenReady().then(() => {
